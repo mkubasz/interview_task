@@ -23,17 +23,19 @@ def read_currency() -> List[str]:
 
 def save_to_db(currencies: List[str]):
     pwd = os.path.abspath(os.path.join(os.path.abspath(__file__), '../../InterviewApi/db.sqlite3'))
-    conn = sqlite3.connect(pwd)
-    c = conn.cursor()
-    c.execute('DELETE FROM api_currency')
-    conn.commit()
-    sql = ''' INSERT INTO api_currency(name,value)
-                  VALUES(?,?) '''
-    for currency in currencies:
-        c.execute(sql, (currency.split(" ")[1], currency.split(" ")[0]))
-    conn.commit()
-    conn.close()
-    return True
+    try:
+        conn = sqlite3.connect(pwd)
+        c = conn.cursor()
+        c.execute('DELETE FROM api_currency')
+        conn.commit()
+        sql = ''' INSERT INTO api_currency(name,value)
+                      VALUES(?,?) '''
+        for currency in currencies:
+            c.execute(sql, (currency.split(" ")[1], currency.split(" ")[0]))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
 
 
 def job():
@@ -41,8 +43,10 @@ def job():
 
 
 if __name__ == "__main__":
-    save_to_db(read_currency())
-    # schedule.every().day.at("15:16").do(job)
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(60)  # wait one minute
+    try:
+        schedule.every().day.at("15:16").do(job)
+        while True:
+            schedule.run_pending()
+            time.sleep(60)  # wait one minute
+    except Exception as e:
+        print(e)
